@@ -153,13 +153,26 @@ src/mneme/
 └── cli.py                Typer
 ```
 
+## Native acceleration (optional)
+
+A C++17 core (`native/`, header-only-friendly, OpenMP-parallel, auto-vectorised
+with AVX2) is available as a drop-in faster backend. Build it once and
+Mneme picks it up automatically:
+
+```bash
+python -m mneme.build_native
+```
+
+See [`native/README.md`](native/README.md) for details. Without it the pure
+Python path is used — everything still works.
+
 ## Roadmap
 
 - [x] Working / Episodic / Semantic / Procedural memory split
 - [x] Hybrid retrieval (similarity + recency + importance + access)
 - [x] OpenAI-compatible REST server
 - [x] Ollama / OpenAI / Anthropic / OpenRouter / LM Studio / vLLM providers
-- [ ] Native C++ memory core (drop-in faster backend)
+- [x] Native C++ memory core (drop-in faster backend)
 - [ ] Tool use and structured function calling
 - [ ] Multi-user sessions and per-user namespacing
 - [ ] Cross-platform desktop UI (Flutter)

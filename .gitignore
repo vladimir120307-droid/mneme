@@ -55,6 +55,12 @@ models/
 *.log
 logs/
 
+# Native build artefacts
+build/
+*.pyd
+*.so
+*.dylib
+
 # OS
 Thumbs.db
 desktop.ini

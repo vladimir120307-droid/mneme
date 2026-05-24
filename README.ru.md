@@ -154,13 +154,26 @@ src/mneme/
 └── cli.py                Typer
 ```
 
+## Нативное ускорение (опционально)
+
+Ядро на C++17 (`native/`, параллелится через OpenMP, авто-векторизуется
+с AVX2) — drop-in более быстрый бэкенд. Собирается одной командой и
+Mneme подхватывает его сам:
+
+```bash
+python -m mneme.build_native
+```
+
+Подробности — [`native/README.md`](native/README.md). Без него работает
+pure-Python путь, всё функционирует одинаково.
+
 ## Дорожная карта
 
 - [x] Деление памяти на рабочую / эпизодическую / семантическую / процедурную
 - [x] Гибридный retrieval (similarity + recency + importance + access)
 - [x] OpenAI-совместимый REST-сервер
 - [x] Провайдеры Ollama / OpenAI / Anthropic / OpenRouter / LM Studio / vLLM
-- [ ] Нативное C++ ядро памяти (drop-in быстрее)
+- [x] Нативное C++ ядро памяти (drop-in быстрее)
 - [ ] Tool use и structured function calling
 - [ ] Мульти-юзер сессии и пер-юзер namespaces
 - [ ] Кросс-платформенный десктоп-UI (Flutter)

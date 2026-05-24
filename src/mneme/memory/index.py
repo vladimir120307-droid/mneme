@@ -1,14 +1,13 @@
 """Vector index over memory embeddings.
 
-Two backends:
+Three backends, picked in this order when ``backend="auto"``:
 
-* ``NumpyIndex`` — pure-numpy brute force. Always available, fast enough up
-  to ~100k vectors. Default.
-* ``HNSWIndex`` — wraps ``hnswlib`` for sub-linear search on larger stores.
-  Activated automatically if hnswlib is importable, or explicitly via
-  ``backend="hnsw"``.
+1. ``NativeIndex`` — C++ core (``mneme._native``). SIMD-friendly brute force
+   parallelised with OpenMP. Selected when the extension is compiled.
+2. ``HNSWIndex`` — ``hnswlib`` for sub-linear search on very large stores.
+3. ``NumpyIndex`` — pure-numpy brute force. Always available.
 
-Both expose the same minimal API: ``add``, ``search``, ``remove``,
+All three expose the same API: ``add``, ``search``, ``remove``,
 ``save``, ``load`` and ``__len__``.
 """
 
@@ -41,11 +40,16 @@ class VectorIndex(ABC):
     @classmethod
     def load(cls, path: Path, dim: int, **kwargs: object) -> VectorIndex:
         backend = kwargs.get("backend", "auto")
+        if backend == "native" or (backend == "auto" and _native_available()):
+            try:
+                return NativeIndex.load(path, dim=dim)
+            except Exception:
+                pass  # fall through to next backend
         if backend == "hnsw" or (backend == "auto" and _hnsw_available()):
             try:
                 return HNSWIndex.load(path, dim=dim)
             except Exception:
-                return NumpyIndex.load(path, dim=dim)
+                pass
         return NumpyIndex.load(path, dim=dim)
 
 
@@ -106,6 +110,57 @@ class NumpyIndex(VectorIndex):
         inst._vectors = data["vectors"].astype(np.float32)
         inst._ids = list(data["ids"])
         inst._id_to_pos = {mid: i for i, mid in enumerate(inst._ids)}
+        return inst
+
+
+# ── Native backend (optional) ───────────────────────────────────────────
+
+def _native_available() -> bool:
+    try:
+        from mneme import _native  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+class NativeIndex(VectorIndex):
+    """Thin wrapper around the C++ ``mneme._native.VectorIndex``."""
+
+    def __init__(self, dim: int):
+        from mneme import _native
+
+        self.dim = dim
+        self._inner = _native.VectorIndex(dim)
+
+    def add(self, memory_id: str, vector: np.ndarray) -> None:
+        v = np.ascontiguousarray(vector, dtype=np.float32).reshape(self.dim)
+        self._inner.add(memory_id, v)
+
+    def search(self, query: np.ndarray, k: int = 10) -> list[tuple[str, float]]:
+        q = np.ascontiguousarray(query, dtype=np.float32).reshape(self.dim)
+        return list(self._inner.search(q, k))
+
+    def remove(self, memory_id: str) -> None:
+        self._inner.remove(memory_id)
+
+    def __len__(self) -> int:
+        return len(self._inner)
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._inner.save(path.with_suffix(".bin"))
+
+    @classmethod
+    def load(cls, path: Path, dim: int, **_: object) -> NativeIndex:
+        from mneme import _native
+
+        bin_path = path.with_suffix(".bin")
+        inst = cls.__new__(cls)
+        inst.dim = dim
+        if bin_path.exists():
+            inst._inner = _native.VectorIndex.load(bin_path)
+        else:
+            inst._inner = _native.VectorIndex(dim)
         return inst
 
 
@@ -202,9 +257,23 @@ class HNSWIndex(VectorIndex):
 
 def make_index(dim: int, backend: str = "auto", max_elements: int = 100_000) -> VectorIndex:
     """Create a fresh empty index. Used when no persisted state exists yet."""
+    if backend == "native" or (backend == "auto" and _native_available()):
+        try:
+            return NativeIndex(dim=dim)
+        except Exception:
+            pass
     if backend == "hnsw" or (backend == "auto" and _hnsw_available()):
         try:
             return HNSWIndex(dim=dim, max_elements=max_elements)
         except Exception:
-            return NumpyIndex(dim=dim)
+            pass
     return NumpyIndex(dim=dim)
+
+
+def active_backend() -> str:
+    """Name of the backend ``backend='auto'`` would pick right now."""
+    if _native_available():
+        return "native"
+    if _hnsw_available():
+        return "hnsw"
+    return "numpy"
