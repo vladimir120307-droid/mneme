@@ -35,7 +35,7 @@ dependencies = [
     "rich>=13.7",
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",
-    "platformdirs>=4.2",
+    "platformdirs>=4.9.6",
     "mcp>=1.0",
 ]
 
