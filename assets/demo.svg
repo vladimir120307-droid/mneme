@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" font-family="ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f1a"/>
+      <stop offset="100%" stop-color="#141a2c"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c5cff"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="640" fill="url(#bgGrad)"/>
+
+  <!-- terminal window chrome -->
+  <rect x="40" y="40" width="1120" height="560" rx="14" fill="#0f1422" stroke="#2a3554" stroke-width="1"/>
+  <rect x="40" y="40" width="1120" height="40" rx="14" fill="#141a2c"/>
+  <rect x="40" y="70" width="1120" height="10" fill="#141a2c"/>
+  <circle cx="68"  cy="60" r="7" fill="#ff5f56"/>
+  <circle cx="92"  cy="60" r="7" fill="#ffbd2e"/>
+  <circle cx="116" cy="60" r="7" fill="#27c93f"/>
+  <text x="600" y="65" text-anchor="middle" fill="#5f6d8a" font-size="14">mneme — long-term memory demo</text>
+
+  <!-- session 1 banner -->
+  <g font-size="14" fill="#5f6d8a">
+    <text x="80" y="115" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="0s" dur="0.3s" fill="freeze"/>
+      # Monday — first session
+    </text>
+  </g>
+
+  <!-- session 1 lines -->
+  <g font-size="20">
+    <!-- line 1: prompt + command -->
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="0.5s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="155" fill="#22d3ee" font-weight="700">$</text>
+      <text x="105" y="155" fill="#e6edf7">mneme chat</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="1.2s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="195" fill="#7c5cff" font-weight="700">you ›</text>
+      <text x="145" y="195" fill="#e6edf7">My name is Vladimir, I work with C++ and Python.</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="2.4s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="235" fill="#22d3ee" font-weight="700">mneme ›</text>
+      <text x="180" y="235" fill="#e6edf7">Noted. Anything else I should remember?</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="3.4s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="275" fill="#7c5cff" font-weight="700">you ›</text>
+      <text x="145" y="275" fill="#e6edf7">I live in Berlin and ship open source.</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="4.4s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="315" fill="#22d3ee" font-weight="700">mneme ›</text>
+      <text x="180" y="315" fill="#e6edf7">Got it.</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="5.4s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="355" fill="#7c5cff" font-weight="700">you ›</text>
+      <text x="145" y="355" fill="#e6edf7">exit</text>
+    </g>
+  </g>
+
+  <!-- divider with "3 days later" -->
+  <g opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="6.6s" dur="0.4s" fill="freeze"/>
+    <line x1="80" y1="390" x2="1120" y2="390" stroke="#2a3554" stroke-dasharray="4 6"/>
+    <rect x="540" y="378" width="120" height="24" rx="12" fill="#0f1422" stroke="#2a3554"/>
+    <text x="600" y="395" text-anchor="middle" fill="#9aa6c1" font-size="14">3 days later</text>
+  </g>
+
+  <!-- session 2 lines -->
+  <g font-size="20">
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="7.6s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="430" fill="#22d3ee" font-weight="700">$</text>
+      <text x="105" y="430" fill="#e6edf7">mneme chat</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="8.3s" dur="0.3s" fill="freeze"/>
+      <text x="80" y="470" fill="#7c5cff" font-weight="700">you ›</text>
+      <text x="145" y="470" fill="#e6edf7">What's my name and what languages do I work with?</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="9.5s" dur="0.4s" fill="freeze"/>
+      <text x="80" y="510" fill="#22d3ee" font-weight="700">mneme ›</text>
+      <text x="180" y="510" fill="url(#accent)" font-weight="600">Vladimir. You work with C++ and Python, based in Berlin.</text>
+    </g>
+
+    <!-- final caption -->
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="10.5s" dur="0.5s" fill="freeze"/>
+      <text x="80" y="560" fill="#5f6d8a" font-size="14">↳ no session re-explanation. memory persists.</text>
+    </g>
+  </g>
+
+  <!-- blinking cursor at the end -->
+  <rect x="780" y="495" width="11" height="22" fill="#22d3ee" opacity="0">
+    <animate attributeName="opacity" values="0;0;1" keyTimes="0;0.95;1" dur="11s" begin="0s" fill="freeze"/>
+    <animate attributeName="opacity" values="1;0;1" dur="1.0s" begin="11s" repeatCount="indefinite"/>
+  </rect>
+</svg>

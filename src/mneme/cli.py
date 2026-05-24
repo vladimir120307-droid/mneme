@@ -241,6 +241,19 @@ def remember(
 
 
 @app.command()
+def mcp() -> None:
+    """Run as an MCP server over stdio.
+
+    Lets MCP-capable clients (Cursor, Claude Desktop, Windsurf, ...) use
+    Mneme as their long-term memory layer. See docs/mcp.md for client
+    configuration.
+    """
+    from mneme.mcp import run_stdio
+
+    run_stdio()
+
+
+@app.command()
 def version() -> None:
     """Print the version."""
     from mneme import __version__

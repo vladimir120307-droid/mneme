@@ -53,6 +53,12 @@ OpenRouter, LM Studio, vLLM — anything OpenAI-compatible.
                         └──────────────────┘
 ```
 
+## Watch it remember
+
+<p align="center">
+  <img src="assets/demo.svg" alt="Mneme remembering across sessions" width="100%"/>
+</p>
+
 ## Why Mneme
 
 | Problem | Mneme |
@@ -213,6 +219,7 @@ Python path is used — everything still works.
 - [x] OpenAI-compatible REST server
 - [x] Ollama / OpenAI / Anthropic / OpenRouter / LM Studio / vLLM providers
 - [x] Native C++ memory core (drop-in faster backend)
+- [x] MCP server (Cursor / Claude Desktop / Windsurf integration)
 - [ ] Tool use and structured function calling
 - [ ] Multi-user sessions and per-user namespacing
 - [ ] Cross-platform desktop UI (Flutter)
@@ -228,6 +235,7 @@ Python path is used — everything still works.
 | Architecture | [docs/architecture.md](docs/architecture.md) | [docs/architecture.ru.md](docs/architecture.ru.md) |
 | Configuration | [docs/configuration.md](docs/configuration.md) | [docs/configuration.ru.md](docs/configuration.ru.md) |
 | API reference | [docs/api.md](docs/api.md) | [docs/api.ru.md](docs/api.ru.md) |
+| MCP integration | [docs/mcp.md](docs/mcp.md) | [docs/mcp.ru.md](docs/mcp.ru.md) |
 | Benchmarks | [docs/benchmarks.md](docs/benchmarks.md) | [docs/benchmarks.ru.md](docs/benchmarks.ru.md) |
 
 ## Contributing

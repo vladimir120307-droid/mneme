@@ -36,6 +36,7 @@ dependencies = [
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",
     "platformdirs>=4.2",
+    "mcp>=1.0",
 ]
 
 [project.optional-dependencies]

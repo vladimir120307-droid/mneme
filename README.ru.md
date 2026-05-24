@@ -53,6 +53,12 @@ LM Studio, vLLM — всему, что совместимо с OpenAI API.
                        └────────────────────┘
 ```
 
+## Смотри как помнит
+
+<p align="center">
+  <img src="assets/demo.svg" alt="Mneme помнит между сессиями" width="100%"/>
+</p>
+
 ## Зачем Mneme
 
 | Проблема | Mneme |
@@ -214,6 +220,7 @@ pure-Python путь, всё функционирует одинаково.
 - [x] OpenAI-совместимый REST-сервер
 - [x] Провайдеры Ollama / OpenAI / Anthropic / OpenRouter / LM Studio / vLLM
 - [x] Нативное C++ ядро памяти (drop-in быстрее)
+- [x] MCP-сервер (интеграция с Cursor / Claude Desktop / Windsurf)
 - [ ] Tool use и structured function calling
 - [ ] Мульти-юзер сессии и пер-юзер namespaces
 - [ ] Кросс-платформенный десктоп-UI (Flutter)
@@ -229,6 +236,7 @@ pure-Python путь, всё функционирует одинаково.
 | Архитектура | [docs/architecture.md](docs/architecture.md) | [docs/architecture.ru.md](docs/architecture.ru.md) |
 | Конфигурация | [docs/configuration.md](docs/configuration.md) | [docs/configuration.ru.md](docs/configuration.ru.md) |
 | API | [docs/api.md](docs/api.md) | [docs/api.ru.md](docs/api.ru.md) |
+| MCP-интеграция | [docs/mcp.md](docs/mcp.md) | [docs/mcp.ru.md](docs/mcp.ru.md) |
 | Бенчмарки | [docs/benchmarks.md](docs/benchmarks.md) | [docs/benchmarks.ru.md](docs/benchmarks.ru.md) |
 
 ## Вклад
