@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mneme"
+version = "0.1.0"
+description = "Local-first AI agent with human-like long-term memory"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "vladimir120307", email = "vladimir120307@gmail.com" },
+]
+keywords = [
+    "ai", "agent", "llm", "memory", "local-first",
+    "vector-search", "embeddings", "chatbot", "ollama",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.24",
+    "sentence-transformers>=2.5",
+    "httpx>=0.27",
+    "pydantic>=2.5",
+    "typer>=0.12",
+    "rich>=13.7",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "platformdirs>=4.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+fast = ["hnswlib>=0.8"]
+openai = ["openai>=1.30"]
+anthropic = ["anthropic>=0.30"]
+
+[project.scripts]
+mneme = "mneme.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/vladimir120307-droid/mneme"
+Repository = "https://github.com/vladimir120307-droid/mneme"
+Issues = "https://github.com/vladimir120307-droid/mneme/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mneme"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
