@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c5cff"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="180" height="180" rx="36" fill="#0b0f1a" stroke="url(#lg)" stroke-width="3"/>
+  <!-- M curve formed from two arches symbolising memory layers -->
+  <path d="M 50 145 L 50 65 Q 75 35 100 75 Q 125 35 150 65 L 150 145"
+        fill="none" stroke="url(#lg)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="100" cy="118" r="6" fill="url(#lg)"/>
+</svg>

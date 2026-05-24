@@ -1,0 +1,47 @@
+name: 💡 Feature request
+description: Propose a new feature or enhancement.
+title: "feat: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the problem first, the solution second. We push
+        back on solutions in search of a problem.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can you not do today, and how does it bite you?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should Mneme do? Sketch the API / CLI / behaviour.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you think about and why is this better?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Extra context
+      description: Use case, links, screenshots, anything that helps.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope fit
+      description: From CONTRIBUTING — Mneme is library + CLI + REST, nothing else.
+      options:
+        - label: This feature improves at least two of {library, CLI, REST}.
+          required: true

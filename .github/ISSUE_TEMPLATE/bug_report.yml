@@ -1,0 +1,80 @@
+name: 🐛 Bug report
+description: Something broke. File a minimal reproducer.
+title: "bug: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Please fill the form — vague reports
+        usually go to the back of the queue.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence describing what's broken.
+      placeholder: e.g. `mneme chat` crashes on first message with provider=ollama
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Exact commands or code, smallest possible. Paste real output.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Mneme version
+      description: Output of `mneme version`
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider / model
+      placeholder: "ollama · llama3.1"
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Sanity checks
+      options:
+        - label: I searched existing issues for duplicates.
+          required: true
+        - label: I'm on the latest release (or master).
+          required: true

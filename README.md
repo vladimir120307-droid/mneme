@@ -1,12 +1,35 @@
-# Mneme
+<p align="center">
+  <img src="assets/banner.svg" alt="Mneme — local-first AI agent with long-term memory" width="100%"/>
+</p>
 
-> **Local-first AI agent with human-like long-term memory.**
-> Your assistant remembers you across weeks and months — not just one session.
+<h1 align="center">Mneme</h1>
 
-[![tests](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml/badge.svg)](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![Русский](https://img.shields.io/badge/lang-русский-red)](README.ru.md)
+<p align="center">
+  <strong>Local-first AI agent with human-like long-term memory.</strong><br/>
+  Your assistant remembers you across weeks and months — not just one session.
+</p>
+
+<p align="center">
+  <a href="https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml"><img src="https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml/badge.svg" alt="tests"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/vladimir120307-droid/mneme?color=blue" alt="License: MIT"/></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+"/></a>
+  <a href="https://github.com/vladimir120307-droid/mneme/stargazers"><img src="https://img.shields.io/github/stars/vladimir120307-droid/mneme?style=social" alt="GitHub stars"/></a>
+  <a href="https://github.com/vladimir120307-droid/mneme/network/members"><img src="https://img.shields.io/github/forks/vladimir120307-droid/mneme?style=social" alt="GitHub forks"/></a>
+  <br/>
+  <a href="https://github.com/vladimir120307-droid/mneme/issues"><img src="https://img.shields.io/github/issues/vladimir120307-droid/mneme" alt="issues"/></a>
+  <a href="https://github.com/vladimir120307-droid/mneme/pulls"><img src="https://img.shields.io/github/issues-pr/vladimir120307-droid/mneme" alt="pull requests"/></a>
+  <a href="https://github.com/vladimir120307-droid/mneme/commits/master"><img src="https://img.shields.io/github/last-commit/vladimir120307-droid/mneme" alt="last commit"/></a>
+  <a href="README.ru.md"><img src="https://img.shields.io/badge/lang-русский-red" alt="Русский"/></a>
+</p>
+
+<p align="center">
+  <a href="docs/quickstart.md">Quickstart</a> ·
+  <a href="docs/memory-model.md">Memory model</a> ·
+  <a href="docs/architecture.md">Architecture</a> ·
+  <a href="docs/api.md">API</a> ·
+  <a href="docs/benchmarks.md">Benchmarks</a> ·
+  <a href="README.ru.md">🇷🇺&nbsp;Русский</a>
+</p>
 
 ---
 
