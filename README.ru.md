@@ -3,6 +3,7 @@
 > **Локальный AI-агент с человекоподобной долговременной памятью.**
 > Ассистент, который помнит тебя неделями и месяцами — а не одной сессией.
 
+[![tests](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml/badge.svg)](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![English](https://img.shields.io/badge/lang-english-blue)](README.md)
@@ -154,6 +155,22 @@ src/mneme/
 └── cli.py                Typer
 ```
 
+## Производительность
+
+Однопоточный brute force на чистом Python-бэкенде (numpy), dim=384,
+k=10, на ноутбуке разработчика:
+
+| N (векторов) | search (среднее) | QPS | add (батч 100k) |
+|---:|---:|---:|---:|
+| 10 000 | 0.21 мс | 4 860 | — |
+| 50 000 | 1.64 мс | 609 | — |
+| 100 000 | 3.20 мс | 312 | 183 мс |
+
+Гибридное скоринг-ядро векторизовано; при наличии нативного C++
+бэкенда оно прозрачно диспатчится в SIMD + OpenMP реализацию.
+Воспроизвести: `python benchmarks/vector_search.py`. Полные цифры в
+[`docs/benchmarks.ru.md`](docs/benchmarks.ru.md).
+
 ## Нативное ускорение (опционально)
 
 Ядро на C++17 (`native/`, параллелится через OpenMP, авто-векторизуется
@@ -180,6 +197,17 @@ pure-Python путь, всё функционирует одинаково.
 - [ ] Расширение для браузера
 - [ ] Импорт памяти из Markdown, дневников, экспортов чатов
 
+## Документация
+
+| Тема | English | Русский |
+|---|---|---|
+| Быстрый старт | [docs/quickstart.md](docs/quickstart.md) | [docs/quickstart.ru.md](docs/quickstart.ru.md) |
+| Модель памяти | [docs/memory-model.md](docs/memory-model.md) | [docs/memory-model.ru.md](docs/memory-model.ru.md) |
+| Архитектура | [docs/architecture.md](docs/architecture.md) | [docs/architecture.ru.md](docs/architecture.ru.md) |
+| Конфигурация | [docs/configuration.md](docs/configuration.md) | [docs/configuration.ru.md](docs/configuration.ru.md) |
+| API | [docs/api.md](docs/api.md) | [docs/api.ru.md](docs/api.ru.md) |
+| Бенчмарки | [docs/benchmarks.md](docs/benchmarks.md) | [docs/benchmarks.ru.md](docs/benchmarks.ru.md) |
+
 ## Вклад
 
 Issues и PR приветствуются. Тесты:
@@ -187,6 +215,7 @@ Issues и PR приветствуются. Тесты:
 ```bash
 pip install -e ".[dev]"
 pytest
+ruff check src/ tests/ benchmarks/
 ```
 
 ## Лицензия

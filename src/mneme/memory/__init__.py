@@ -12,14 +12,14 @@ from mneme.memory.types import (
 )
 
 __all__ = [
+    "EpisodicMemory",
     "Memory",
     "MemoryKind",
     "MemoryStore",
-    "WorkingMemory",
-    "EpisodicMemory",
-    "SemanticMemory",
     "ProceduralMemory",
     "RetrievalConfig",
     "RetrievedContext",
+    "SemanticMemory",
+    "WorkingMemory",
     "retrieve",
 ]

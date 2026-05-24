@@ -112,7 +112,7 @@ def create_app(provider: str | None = None, model: str | None = None) -> FastAPI
         )
         # Remember the turn so server use cases also accumulate memory.
         if last_user:
-            agent._remember_turn(last_user, resp.content)  # noqa: SLF001
+            agent._remember_turn(last_user, resp.content)
         return ChatResponse(
             id=f"chatcmpl-{uuid4().hex[:24]}",
             created=int(time.time()),
@@ -212,7 +212,7 @@ async def _stream_openai(agent: Agent, messages: list[Message], model: str, req:
     # Persist as a single turn for memory accumulation.
     last_user = next((m.content for m in reversed(messages) if m.role == "user"), "")
     if last_user:
-        agent._remember_turn(last_user, "".join(pieces))  # noqa: SLF001
+        agent._remember_turn(last_user, "".join(pieces))
 
 
 def _build_memory(req: CreateMemoryRequest) -> Memory:

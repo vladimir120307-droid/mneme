@@ -6,7 +6,7 @@ Talks to a local Ollama server (default http://localhost:11434).
 from __future__ import annotations
 
 import json
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 
@@ -76,23 +76,22 @@ class OllamaProvider(LLMProvider):
         **_: object,
     ) -> AsyncIterator[str]:
         payload = self._payload(messages, model, temperature, max_tokens, stream=True)
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
-                "POST", f"{self.base_url}/api/chat", json=payload
-            ) as r:
-                r.raise_for_status()
-                async for line in r.aiter_lines():
-                    if not line:
-                        continue
-                    try:
-                        chunk = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    piece = chunk.get("message", {}).get("content", "")
-                    if piece:
-                        yield piece
-                    if chunk.get("done"):
-                        break
+        async with httpx.AsyncClient(timeout=self.timeout) as client, client.stream(
+            "POST", f"{self.base_url}/api/chat", json=payload
+        ) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line:
+                    continue
+                try:
+                    chunk = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                piece = chunk.get("message", {}).get("content", "")
+                if piece:
+                    yield piece
+                if chunk.get("done"):
+                    break
 
     async def list_models(self) -> list[str]:
         async with httpx.AsyncClient(timeout=self.timeout) as client:

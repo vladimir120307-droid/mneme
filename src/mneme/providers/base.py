@@ -7,9 +7,9 @@ implements this protocol so the agent can switch backends with one config value.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Literal
-
+from typing import Literal
 
 Role = Literal["system", "user", "assistant", "tool"]
 

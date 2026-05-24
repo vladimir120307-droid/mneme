@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 
@@ -90,25 +90,24 @@ class OpenAICompatibleProvider(LLMProvider):
         **_: object,
     ) -> AsyncIterator[str]:
         payload = self._payload(messages, model, temperature, max_tokens, stream=True)
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
-                "POST",
-                f"{self.base_url}/chat/completions",
-                headers=self._headers(),
-                json=payload,
-            ) as r:
-                r.raise_for_status()
-                async for line in r.aiter_lines():
-                    if not line or not line.startswith("data:"):
-                        continue
-                    data_s = line[5:].strip()
-                    if data_s == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(data_s)
-                    except json.JSONDecodeError:
-                        continue
-                    delta = chunk["choices"][0].get("delta", {})
-                    piece = delta.get("content")
-                    if piece:
-                        yield piece
+        async with httpx.AsyncClient(timeout=self.timeout) as client, client.stream(
+            "POST",
+            f"{self.base_url}/chat/completions",
+            headers=self._headers(),
+            json=payload,
+        ) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line or not line.startswith("data:"):
+                    continue
+                data_s = line[5:].strip()
+                if data_s == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_s)
+                except json.JSONDecodeError:
+                    continue
+                delta = chunk["choices"][0].get("delta", {})
+                piece = delta.get("content")
+                if piece:
+                    yield piece

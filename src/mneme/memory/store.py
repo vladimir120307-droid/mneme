@@ -8,12 +8,11 @@ without touching callers.
 from __future__ import annotations
 
 import json
-import math
 import sqlite3
 import threading
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 
 import numpy as np
 from platformdirs import user_data_dir
@@ -28,7 +27,6 @@ from mneme.memory.types import (
     SemanticMemory,
     WorkingMemory,
 )
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS memories (
@@ -145,7 +143,7 @@ class MemoryStore:
             return []
         vecs = self.embedder.embed_many([m.content for m in items])
         with self._lock:
-            for mem, vec in zip(items, vecs):
+            for mem, vec in zip(items, vecs, strict=True):
                 self._write_row(mem)
                 self.index.add(mem.id, vec)
         return items
@@ -219,7 +217,11 @@ class MemoryStore:
         recency_half_life_days: float = 30.0,
         weights: tuple[float, float, float, float] = (0.55, 0.20, 0.20, 0.05),
     ) -> list[tuple[Memory, float]]:
-        """Hybrid scoring: similarity + recency + importance + access boost."""
+        """Hybrid scoring: similarity + recency + importance + access boost.
+
+        Scoring is vectorised (numpy or, when compiled, the native kernel)
+        and only the top-K rows are materialised into ``Memory`` objects.
+        """
         if not query:
             return []
         qvec = self.embedder.embed(query)
@@ -229,35 +231,65 @@ class MemoryStore:
             return []
         ids = [mid for mid, _ in candidates]
         placeholders = ",".join("?" * len(ids))
-        sql = f"SELECT * FROM memories WHERE id IN ({placeholders})"
+        sql = (
+            "SELECT id, created_at, access_count, importance "
+            f"FROM memories WHERE id IN ({placeholders})"
+        )
         args: list[object] = list(ids)
         if kind is not None:
             sql += " AND kind = ?"
             args.append(kind.value)
         with self._lock:
-            rows = self._conn.execute(sql, args).fetchall()
+            light_rows = self._conn.execute(sql, args).fetchall()
+        if not light_rows:
+            return []
+
         sim_lookup = dict(candidates)
-        now = datetime.now(timezone.utc).timestamp()
-        w_sim, w_recency, w_imp, w_access = weights
-        scored: list[tuple[Memory, float]] = []
-        for row in rows:
-            mem = _row_to_memory(row)
-            sim = sim_lookup.get(mem.id, 0.0)
-            age_days = max(0.0, (now - _ts(mem.created_at)) / 86_400.0)
-            recency = math.exp(-age_days / recency_half_life_days)
-            access_boost = 1.0 - math.exp(-mem.access_count / 5.0)
-            score = (
-                w_sim * sim
-                + w_recency * recency
-                + w_imp * mem.importance
-                + w_access * access_boost
-            )
-            scored.append((mem, score))
-        scored.sort(key=lambda x: x[1], reverse=True)
-        top = scored[:k]
-        for mem, _ in top:
+        n = len(light_rows)
+        sim = np.empty(n, dtype=np.float32)
+        created_ts = np.empty(n, dtype=np.float64)
+        access = np.empty(n, dtype=np.int64)
+        importance = np.empty(n, dtype=np.float32)
+        for i, r in enumerate(light_rows):
+            sim[i] = sim_lookup.get(r["id"], 0.0)
+            created_ts[i] = r["created_at"]
+            access[i] = r["access_count"]
+            importance[i] = r["importance"]
+
+        now_ts = datetime.now(timezone.utc).timestamp()
+        scores = _hybrid_score(
+            sim, created_ts, access, importance,
+            now_ts=now_ts,
+            half_life_days=recency_half_life_days,
+            weights=weights,
+        )
+
+        # partial sort: find indices of top-K largest scores
+        kk = min(k, n)
+        if kk <= 0:
+            return []
+        top_idx = np.argpartition(-scores, kth=kk - 1)[:kk]
+        top_idx = top_idx[np.argsort(-scores[top_idx])]
+        top_ids = [light_rows[int(i)]["id"] for i in top_idx]
+
+        # only now hydrate the top-K rows into Memory objects
+        full_placeholders = ",".join("?" * len(top_ids))
+        with self._lock:
+            full_rows = self._conn.execute(
+                f"SELECT * FROM memories WHERE id IN ({full_placeholders})",
+                top_ids,
+            ).fetchall()
+        by_id = {r["id"]: r for r in full_rows}
+        out: list[tuple[Memory, float]] = []
+        for i in top_idx:
+            mid = light_rows[int(i)]["id"]
+            row = by_id.get(mid)
+            if row is None:
+                continue
+            out.append((_row_to_memory(row), float(scores[int(i)])))
+        for mem, _ in out:
             self.touch(mem.id)
-        return top
+        return out
 
     # ── maintenance ─────────────────────────────────────────────────────
 
@@ -319,9 +351,44 @@ class MemoryStore:
         if not rows:
             return
         vecs = self.embedder.embed_many([r["content"] for r in rows])
-        for row, vec in zip(rows, vecs):
+        for row, vec in zip(rows, vecs, strict=True):
             assert self._index is not None
             self._index.add(row["id"], vec)
+
+
+def _hybrid_score(
+    sim: np.ndarray,
+    created_ts: np.ndarray,
+    access: np.ndarray,
+    importance: np.ndarray,
+    *,
+    now_ts: float,
+    half_life_days: float,
+    weights: tuple[float, float, float, float],
+) -> np.ndarray:
+    """Vectorised hybrid retrieval score. Uses native kernel when present."""
+    try:
+        from mneme import _native  # type: ignore[attr-defined]
+
+        w = _native.ScoreWeights()
+        w.w_sim, w.w_recency, w.w_importance, w.w_access = weights
+        w.recency_half_life_days = float(half_life_days)
+        return np.asarray(
+            _native.compute_scores(sim, created_ts, access, importance, w, now_ts)
+        )
+    except ImportError:
+        pass
+
+    w_sim, w_recency, w_imp, w_access = weights
+    age_days = np.maximum(0.0, (now_ts - created_ts) / 86_400.0)
+    recency = np.exp(-age_days / half_life_days).astype(np.float32)
+    access_boost = (1.0 - np.exp(-access.astype(np.float32) / 5.0)).astype(np.float32)
+    return (
+        np.float32(w_sim) * sim
+        + np.float32(w_recency) * recency
+        + np.float32(w_imp) * importance
+        + np.float32(w_access) * access_boost
+    )
 
 
 def _row_to_memory(row: sqlite3.Row) -> Memory:

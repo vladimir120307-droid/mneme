@@ -6,7 +6,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 # ── OpenAI-compatible chat ─────────────────────────────────────────────
 
 class ChatMessage(BaseModel):

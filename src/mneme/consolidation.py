@@ -16,7 +16,6 @@ from mneme.memory.store import MemoryStore
 from mneme.memory.types import EpisodicMemory, MemoryKind, SemanticMemory
 from mneme.providers.base import LLMProvider, Message
 
-
 _PROMPT = """You are extracting durable facts from a stream of recent interactions.
 
 Below are recent EPISODES (timestamped events). From them, extract general,

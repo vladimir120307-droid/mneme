@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 
@@ -104,22 +104,21 @@ class AnthropicProvider(LLMProvider):
         }
         if system:
             payload["system"] = system
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
-                "POST",
-                f"{self.base_url}/v1/messages",
-                headers=self._headers(),
-                json=payload,
-            ) as r:
-                r.raise_for_status()
-                async for line in r.aiter_lines():
-                    if not line.startswith("data:"):
-                        continue
-                    try:
-                        evt = json.loads(line[5:].strip())
-                    except json.JSONDecodeError:
-                        continue
-                    if evt.get("type") == "content_block_delta":
-                        delta = evt.get("delta", {})
-                        if delta.get("type") == "text_delta":
-                            yield delta.get("text", "")
+        async with httpx.AsyncClient(timeout=self.timeout) as client, client.stream(
+            "POST",
+            f"{self.base_url}/v1/messages",
+            headers=self._headers(),
+            json=payload,
+        ) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line.startswith("data:"):
+                    continue
+                try:
+                    evt = json.loads(line[5:].strip())
+                except json.JSONDecodeError:
+                    continue
+                if evt.get("type") == "content_block_delta":
+                    delta = evt.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        yield delta.get("text", "")

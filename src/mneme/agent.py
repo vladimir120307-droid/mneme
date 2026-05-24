@@ -7,8 +7,8 @@ each turn looks like: receive → retrieve → think → respond → remember.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import AsyncIterator
 from uuid import uuid4
 
 from mneme.consolidation import Consolidator
@@ -17,7 +17,6 @@ from mneme.memory.store import MemoryStore
 from mneme.memory.types import EpisodicMemory, MemoryKind, WorkingMemory
 from mneme.providers.base import LLMProvider, Message
 from mneme.providers.registry import get_provider
-
 
 DEFAULT_SYSTEM = (
     "You are Mneme, a helpful assistant with long-term memory. "

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -28,7 +27,7 @@ app.add_typer(memory_app, name="memory")
 console = Console()
 
 
-def _make_agent(provider: Optional[str], model: Optional[str]) -> Agent:
+def _make_agent(provider: str | None, model: str | None) -> Agent:
     settings = load_settings()
     embedder = Embedder(settings.embedding_model)
     store = MemoryStore(path=settings.data_dir, embedder=embedder)
@@ -48,8 +47,8 @@ def _make_store() -> MemoryStore:
 
 @app.command()
 def chat(
-    provider: Optional[str] = typer.Option(None, "--provider", "-p"),
-    model: Optional[str] = typer.Option(None, "--model", "-m"),
+    provider: str | None = typer.Option(None, "--provider", "-p"),
+    model: str | None = typer.Option(None, "--model", "-m"),
     stream: bool = typer.Option(True, "--stream/--no-stream"),
 ) -> None:
     """Interactive chat with long-term memory."""
@@ -63,14 +62,14 @@ def chat(
         try:
             while True:
                 try:
-                    user = console.input("[bold cyan]you ›[/bold cyan] ")
+                    user = console.input("[bold cyan]you ›[/bold cyan] ")  # noqa: RUF001
                 except EOFError:
                     break
                 if not user.strip():
                     continue
                 if user.strip().lower() in {"exit", "quit", ":q"}:
                     break
-                console.print("[bold magenta]mneme ›[/bold magenta] ", end="")
+                console.print("[bold magenta]mneme ›[/bold magenta] ", end="")  # noqa: RUF001
                 if stream:
                     async for piece in agent.stream(user):
                         console.print(piece, end="", soft_wrap=True)
@@ -87,8 +86,8 @@ def chat(
 @app.command()
 def ask(
     prompt: str = typer.Argument(..., help="The question to ask."),
-    provider: Optional[str] = typer.Option(None, "--provider", "-p"),
-    model: Optional[str] = typer.Option(None, "--model", "-m"),
+    provider: str | None = typer.Option(None, "--provider", "-p"),
+    model: str | None = typer.Option(None, "--model", "-m"),
 ) -> None:
     """One-shot question, prints the answer to stdout."""
     agent = _make_agent(provider, model)
@@ -103,7 +102,7 @@ def ask(
 
 @memory_app.command("list")
 def memory_list(
-    kind: Optional[str] = typer.Option(None, "--kind", "-k"),
+    kind: str | None = typer.Option(None, "--kind", "-k"),
     limit: int = typer.Option(20, "--limit", "-n"),
 ) -> None:
     """List stored memories."""
@@ -119,7 +118,7 @@ def memory_list(
 @memory_app.command("search")
 def memory_search(
     query: str = typer.Argument(...),
-    kind: Optional[str] = typer.Option(None, "--kind", "-k"),
+    kind: str | None = typer.Option(None, "--kind", "-k"),
     k: int = typer.Option(10, "--top", "-n"),
 ) -> None:
     """Vector + heuristic search across memories."""
@@ -199,10 +198,10 @@ def memory_decay(
 
 @app.command()
 def serve(
-    host: Optional[str] = typer.Option(None, "--host"),
-    port: Optional[int] = typer.Option(None, "--port"),
-    provider: Optional[str] = typer.Option(None, "--provider", "-p"),
-    model: Optional[str] = typer.Option(None, "--model", "-m"),
+    host: str | None = typer.Option(None, "--host"),
+    port: int | None = typer.Option(None, "--port"),
+    provider: str | None = typer.Option(None, "--provider", "-p"),
+    model: str | None = typer.Option(None, "--model", "-m"),
 ) -> None:
     """Start the REST API server (OpenAI-compatible)."""
     import uvicorn

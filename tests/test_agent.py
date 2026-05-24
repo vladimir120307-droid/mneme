@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import pytest
 
@@ -20,7 +20,9 @@ class FakeProvider(LLMProvider):
         self.calls.append(list(messages))
         return ChatResponse(content=self.reply, model=model)
 
-    async def stream(self, messages, *, model, temperature=0.7, max_tokens=None, **_) -> AsyncIterator[str]:
+    async def stream(
+        self, messages, *, model, temperature=0.7, max_tokens=None, **_
+    ) -> AsyncIterator[str]:
         self.calls.append(list(messages))
         for word in self.reply.split():
             yield word + " "

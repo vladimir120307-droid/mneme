@@ -13,6 +13,7 @@ All three expose the same API: ``add``, ``search``, ``remove``,
 
 from __future__ import annotations
 
+import contextlib
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -56,28 +57,59 @@ class VectorIndex(ABC):
 # ── numpy backend ───────────────────────────────────────────────────────
 
 class NumpyIndex(VectorIndex):
+    """Pure-numpy brute-force cosine index.
+
+    Uses an amortised-growth backing buffer (like ``std::vector``) so that
+    ``add`` is O(1) amortised instead of O(N) per insert. Search is a single
+    dense matrix-vector product followed by partial top-K.
+    """
+
+    _INITIAL_CAPACITY = 256
+
     def __init__(self, dim: int):
         self.dim = dim
         self._ids: list[str] = []
         self._id_to_pos: dict[str, int] = {}
-        self._vectors = np.zeros((0, dim), dtype=np.float32)
+        self._capacity = self._INITIAL_CAPACITY
+        self._size = 0
+        self._buffer = np.zeros((self._capacity, dim), dtype=np.float32)
+
+    @property
+    def _vectors(self) -> np.ndarray:
+        """View of the live portion of the buffer (no copy)."""
+        return self._buffer[: self._size]
+
+    def _ensure_capacity(self, needed: int) -> None:
+        if needed <= self._capacity:
+            return
+        new_cap = self._capacity
+        while new_cap < needed:
+            new_cap *= 2
+        new_buf = np.zeros((new_cap, self.dim), dtype=np.float32)
+        new_buf[: self._size] = self._buffer[: self._size]
+        self._buffer = new_buf
+        self._capacity = new_cap
 
     def add(self, memory_id: str, vector: np.ndarray) -> None:
         v = np.asarray(vector, dtype=np.float32).reshape(self.dim)
-        if memory_id in self._id_to_pos:
-            self._vectors[self._id_to_pos[memory_id]] = v
+        existing = self._id_to_pos.get(memory_id)
+        if existing is not None:
+            self._buffer[existing] = v
             return
-        self._id_to_pos[memory_id] = len(self._ids)
+        self._ensure_capacity(self._size + 1)
+        pos = self._size
+        self._buffer[pos] = v
         self._ids.append(memory_id)
-        self._vectors = np.vstack([self._vectors, v[None, :]])
+        self._id_to_pos[memory_id] = pos
+        self._size += 1
 
     def search(self, query: np.ndarray, k: int = 10) -> list[tuple[str, float]]:
-        if not self._ids:
+        if self._size == 0:
             return []
         q = np.asarray(query, dtype=np.float32).reshape(self.dim)
         # vectors are assumed already L2-normalised by the embedder
         sims = self._vectors @ q
-        k = min(k, len(self._ids))
+        k = min(k, self._size)
         if k <= 0:
             return []
         top = np.argpartition(-sims, kth=k - 1)[:k]
@@ -88,17 +120,27 @@ class NumpyIndex(VectorIndex):
         pos = self._id_to_pos.pop(memory_id, None)
         if pos is None:
             return
-        self._ids.pop(pos)
-        self._vectors = np.delete(self._vectors, pos, axis=0)
-        # rebuild positions
-        self._id_to_pos = {mid: i for i, mid in enumerate(self._ids)}
+        last = self._size - 1
+        if pos != last:
+            # swap-remove: move the last live row into the freed slot
+            last_id = self._ids[last]
+            self._buffer[pos] = self._buffer[last]
+            self._ids[pos] = last_id
+            self._id_to_pos[last_id] = pos
+        self._ids.pop()
+        self._buffer[last] = 0.0
+        self._size -= 1
 
     def __len__(self) -> int:
-        return len(self._ids)
+        return self._size
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez(path.with_suffix(".npz"), vectors=self._vectors, ids=np.array(self._ids, dtype=object))
+        np.savez(
+            path.with_suffix(".npz"),
+            vectors=self._vectors,
+            ids=np.array(self._ids, dtype=object),
+        )
 
     @classmethod
     def load(cls, path: Path, dim: int, **_: object) -> NumpyIndex:
@@ -107,9 +149,13 @@ class NumpyIndex(VectorIndex):
         if not npz_path.exists():
             return inst
         data = np.load(npz_path, allow_pickle=True)
-        inst._vectors = data["vectors"].astype(np.float32)
-        inst._ids = list(data["ids"])
-        inst._id_to_pos = {mid: i for i, mid in enumerate(inst._ids)}
+        vectors = data["vectors"].astype(np.float32)
+        ids = list(data["ids"])
+        inst._ensure_capacity(max(len(ids), cls._INITIAL_CAPACITY))
+        inst._buffer[: len(ids)] = vectors
+        inst._ids = ids
+        inst._id_to_pos = {mid: i for i, mid in enumerate(ids)}
+        inst._size = len(ids)
         return inst
 
 
@@ -206,7 +252,7 @@ class HNSWIndex(VectorIndex):
         k = min(k, self._next_label)
         labels, dists = self._index.knn_query(query.reshape(1, -1), k=k)
         out: list[tuple[str, float]] = []
-        for label, dist in zip(labels[0], dists[0]):
+        for label, dist in zip(labels[0], dists[0], strict=True):
             mid = self._label_to_id.get(int(label))
             if mid is None:
                 continue
@@ -218,10 +264,8 @@ class HNSWIndex(VectorIndex):
         if label is None:
             return
         self._label_to_id.pop(label, None)
-        try:
+        with contextlib.suppress(RuntimeError):
             self._index.mark_deleted(label)
-        except RuntimeError:
-            pass
 
     def __len__(self) -> int:
         return len(self._id_to_label)

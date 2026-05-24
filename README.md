@@ -3,6 +3,7 @@
 > **Local-first AI agent with human-like long-term memory.**
 > Your assistant remembers you across weeks and months — not just one session.
 
+[![tests](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml/badge.svg)](https://github.com/vladimir120307-droid/mneme/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![Русский](https://img.shields.io/badge/lang-русский-red)](README.ru.md)
@@ -153,6 +154,22 @@ src/mneme/
 └── cli.py                Typer
 ```
 
+## Performance
+
+Single-threaded brute force on the pure-Python (numpy) backend, dim=384,
+k=10, on a developer laptop:
+
+| N (vectors) | search (mean) | QPS | add (100k batch) |
+|---:|---:|---:|---:|
+| 10 000 | 0.21 ms | 4 860 | — |
+| 50 000 | 1.64 ms | 609 | — |
+| 100 000 | 3.20 ms | 312 | 183 ms |
+
+The hybrid scoring kernel is vectorised; with the native C++ backend
+present it dispatches to a SIMD + OpenMP implementation transparently.
+Reproduce: `python benchmarks/vector_search.py`. Full numbers in
+[`docs/benchmarks.md`](docs/benchmarks.md) ([RU](docs/benchmarks.ru.md)).
+
 ## Native acceleration (optional)
 
 A C++17 core (`native/`, header-only-friendly, OpenMP-parallel, auto-vectorised
@@ -179,6 +196,17 @@ Python path is used — everything still works.
 - [ ] Browser extension
 - [ ] Memory import from Markdown, journals, chat exports
 
+## Documentation
+
+| Topic | English | Русский |
+|---|---|---|
+| Quickstart | [docs/quickstart.md](docs/quickstart.md) | [docs/quickstart.ru.md](docs/quickstart.ru.md) |
+| Memory model | [docs/memory-model.md](docs/memory-model.md) | [docs/memory-model.ru.md](docs/memory-model.ru.md) |
+| Architecture | [docs/architecture.md](docs/architecture.md) | [docs/architecture.ru.md](docs/architecture.ru.md) |
+| Configuration | [docs/configuration.md](docs/configuration.md) | [docs/configuration.ru.md](docs/configuration.ru.md) |
+| API reference | [docs/api.md](docs/api.md) | [docs/api.ru.md](docs/api.ru.md) |
+| Benchmarks | [docs/benchmarks.md](docs/benchmarks.md) | [docs/benchmarks.ru.md](docs/benchmarks.ru.md) |
+
 ## Contributing
 
 Issues and PRs welcome. Run the test suite:
@@ -186,6 +214,7 @@ Issues and PRs welcome. Run the test suite:
 ```bash
 pip install -e ".[dev]"
 pytest
+ruff check src/ tests/ benchmarks/
 ```
 
 ## License
