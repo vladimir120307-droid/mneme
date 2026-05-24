@@ -47,7 +47,7 @@ dev = [
 ]
 fast = ["hnswlib>=0.8"]
 openai = ["openai>=1.30"]
-anthropic = ["anthropic>=0.30"]
+anthropic = ["anthropic>=0.104.1"]
 
 [project.scripts]
 mneme = "mneme.cli:app"
